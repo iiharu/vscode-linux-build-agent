@@ -1,0 +1,140 @@
+--- .config
++++ .config
+@@ -71,7 +71,7 @@
+ # CT_FORBID_DOWNLOAD is not set
+ # CT_FORCE_DOWNLOAD is not set
+ CT_CONNECT_TIMEOUT=10
+-CT_DOWNLOAD_WGET_OPTIONS="--passive-ftp --tries=3 -nc --progress=dot:binary"
++CT_DOWNLOAD_WGET_OPTIONS="--passive-ftp --tries=3 -nc --no-verbose"
+ # CT_ONLY_DOWNLOAD is not set
+ # CT_USE_MIRROR is not set
+ CT_VERIFY_DOWNLOAD_DIGEST=y
+@@ -114,13 +114,13 @@
+ #
+ # CT_LOG_ERROR is not set
+ # CT_LOG_WARN is not set
+-# CT_LOG_INFO is not set
+-CT_LOG_EXTRA=y
++CT_LOG_INFO=y
++# CT_LOG_EXTRA is not set
+ # CT_LOG_ALL is not set
+ # CT_LOG_DEBUG is not set
+-CT_LOG_LEVEL_MAX="EXTRA"
++CT_LOG_LEVEL_MAX="INFO"
+ # CT_LOG_SEE_TOOLS_WARN is not set
+-CT_LOG_PROGRESS_BAR=y
++# CT_LOG_PROGRESS_BAR is not set
+ CT_LOG_TO_FILE=y
+ CT_LOG_FILE_COMPRESS=y
+ # end of Paths and misc options
+@@ -273,7 +273,7 @@
+ # CT_LINUX_V_5_1 is not set
+ # CT_LINUX_V_5_0 is not set
+ # CT_LINUX_V_4_20 is not set
+-CT_LINUX_V_4_19=y
++# CT_LINUX_V_4_19 is not set
+ # CT_LINUX_V_4_18 is not set
+ # CT_LINUX_V_4_17 is not set
+ # CT_LINUX_V_4_16 is not set
+@@ -289,10 +289,10 @@
+ # CT_LINUX_V_3_16 is not set
+ # CT_LINUX_V_3_13 is not set
+ # CT_LINUX_V_3_12 is not set
+-# CT_LINUX_V_3_10 is not set
++CT_LINUX_V_3_10=y
+ # CT_LINUX_V_3_4 is not set
+ # CT_LINUX_V_3_2 is not set
+-CT_LINUX_VERSION="4.19.287"
++CT_LINUX_VERSION="3.10.108"
+ CT_LINUX_MIRRORS="$(CT_Mirrors kernel.org linux ${CT_LINUX_VERSION})"
+ CT_LINUX_ARCHIVE_FILENAME="@{pkg_name}-@{version}"
+ CT_LINUX_ARCHIVE_DIRNAME="@{pkg_name}-@{version}"
+@@ -318,7 +318,7 @@
+ # CT_KERNEL_LINUX_VERBOSITY_1 is not set
+ # CT_KERNEL_LINUX_VERBOSITY_2 is not set
+ CT_KERNEL_LINUX_VERBOSE_LEVEL=0
+-CT_KERNEL_LINUX_INSTALL_CHECK=y
++# CT_KERNEL_LINUX_INSTALL_CHECK is not set
+ CT_ALL_KERNEL_CHOICES="BARE_METAL LINUX WINDOWS"
+ 
+ #
+@@ -480,22 +480,22 @@
+ CT_THREADS="nptl"
+ CT_GLIBC_BUILD_SSP=y
+ CT_GLIBC_HAS_LIBIDN_ADDON=y
+-CT_GLIBC_USE_LIBIDN_ADDON=y
++# CT_GLIBC_USE_LIBIDN_ADDON is not set
+ CT_GLIBC_NO_SPARC_V8=y
+ CT_GLIBC_HAS_OBSOLETE_RPC=y
+ CT_GLIBC_EXTRA_CONFIG_ARRAY=""
+ CT_GLIBC_CONFIGPARMS=""
+-CT_GLIBC_ENABLE_DEBUG=y
++# CT_GLIBC_ENABLE_DEBUG is not set
+ CT_GLIBC_EXTRA_CFLAGS=""
+-CT_GLIBC_ENABLE_OBSOLETE_RPC=y
++# CT_GLIBC_ENABLE_OBSOLETE_RPC is not set
+ # CT_GLIBC_DISABLE_VERSIONING is not set
+ CT_GLIBC_OLDEST_ABI=""
+ CT_GLIBC_FORCE_UNWIND=y
+ # CT_GLIBC_LOCALES is not set
+ # CT_GLIBC_KERNEL_VERSION_NONE is not set
+-CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y
+-# CT_GLIBC_KERNEL_VERSION_CHOSEN is not set
+-CT_GLIBC_MIN_KERNEL="4.19.287"
++# CT_GLIBC_KERNEL_VERSION_AS_HEADERS is not set
++CT_GLIBC_KERNEL_VERSION_CHOSEN=y
++CT_GLIBC_MIN_KERNEL_VERSION="2.6.32"
+ # CT_GLIBC_SSP_DEFAULT is not set
+ # CT_GLIBC_SSP_NO is not set
+ # CT_GLIBC_SSP_YES is not set
+@@ -513,7 +513,7 @@
+ #
+ CT_THREADS_NATIVE=y
+ # CT_CREATE_LDSO_CONF is not set
+-CT_LIBC_XLDD=y
++# CT_LIBC_XLDD is not set
+ # end of C-library
+ 
+ #
+@@ -593,7 +593,7 @@
+ #
+ # Optimisation features
+ #
+-CT_CC_GCC_USE_GRAPHITE=y
++# CT_CC_GCC_USE_GRAPHITE is not set
+ 
+ #
+ # Settings for libraries running on target
+@@ -605,7 +605,7 @@
+ # CT_CC_GCC_LIBSSP is not set
+ # CT_CC_GCC_LIBQUADMATH is not set
+ # CT_CC_GCC_LIBSANITIZER is not set
+-CT_CC_GCC_LIBMPX=y
++# CT_CC_GCC_LIBMPX is not set
+ CT_CC_GCC_LIBSTDCXX_VERBOSE=m
+ 
+ #
+@@ -639,7 +639,7 @@
+ # Debug facilities
+ #
+ # CT_DEBUG_DUMA is not set
+-CT_DEBUG_GDB=y
++# CT_DEBUG_GDB is not set
+ CT_DEBUG_GDB_PKG_KSYM="GDB"
+ CT_GDB_DIR_NAME="gdb"
+ CT_GDB_PKG_NAME="gdb"
+@@ -892,12 +892,12 @@
+ CT_GETTEXT_NEEDED=y
+ CT_GMP_NEEDED=y
+ CT_MPFR_NEEDED=y
+-CT_ISL_NEEDED=y
++# CT_ISL_NEEDED is not set
+ CT_MPC_NEEDED=y
+ CT_EXPAT_NEEDED=y
+ CT_NCURSES_NEEDED=y
+ CT_ZLIB_NEEDED=y
+-CT_ZSTD_NEEDED=y
++# CT_ZSTD_NEEDED is not set
+ CT_LIBICONV=y
+ CT_GETTEXT=y
+ CT_GMP=y
