@@ -1,0 +1,139 @@
+name: Build RHEL 7-compatible GNU toolchain
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    env:
+      CT_NG_VERSION: "1.26.0"
+      CONFIG: x86_64-gcc-8.5.0-glibc-2.28.config
+      CONFIG_PATCH: x86_64-gcc-8.5.0-glibc-2.28-rhel7.patch
+      TUPLE: x86_64-linux-gnu
+      PACKAGE: x86_64-linux-gnu-glibc-2.28-gcc-8.5.0-rhel7
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get -qq update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -o Dpkg::Use-Pty=0 install -y \
+            autoconf automake bison bzip2 flex g++ gawk gcc gperf help2man \
+            libncurses5-dev libtool libtool-bin make meson ninja-build \
+            patch python3-dev rsync texinfo unzip wget xz-utils
+
+      - name: Set up crosstool-ng
+        run: |
+          set -euo pipefail
+          wget --no-verbose \
+            "http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-${CT_NG_VERSION}.tar.bz2"
+          tar -xjf "crosstool-ng-${CT_NG_VERSION}.tar.bz2"
+          cd "crosstool-ng-${CT_NG_VERSION}"
+          ./configure --quiet --prefix="${PWD}/../.cache/crosstool-ng-${CT_NG_VERSION}"
+          make --silent -j"$(nproc)"
+          make --silent install >/dev/null
+
+      - name: Add crosstool-ng to PATH
+        run: echo "${PWD}/.cache/crosstool-ng-${CT_NG_VERSION}/bin" >> "${GITHUB_PATH}"
+
+      - name: Create build directory
+        run: mkdir toolchain-dir
+
+      - name: Derive RHEL 7 configuration
+        run: |
+          set -euo pipefail
+          cp "${CONFIG}" toolchain-dir/.config
+          cd toolchain-dir
+
+          patch --batch --forward --fuzz=0 .config < "../${CONFIG_PATCH}"
+
+          ct-ng olddefconfig
+
+          cp .config ../rhel7-toolchain.config
+
+          ! grep -Fqx 'CT_GLIBC_KERNEL_VERSION_AS_HEADERS=y' .config
+          ! grep -Fqx 'CT_KERNEL_LINUX_INSTALL_CHECK=y' .config
+          ! grep -Fqx 'CT_GLIBC_USE_LIBIDN_ADDON=y' .config
+          ! grep -Fqx 'CT_GLIBC_ENABLE_DEBUG=y' .config
+          ! grep -Fqx 'CT_GLIBC_ENABLE_OBSOLETE_RPC=y' .config
+          ! grep -Fqx 'CT_LIBC_XLDD=y' .config
+          grep -Fqx 'CT_GLIBC_KERNEL_VERSION_CHOSEN=y' .config
+          grep -Fqx 'CT_GLIBC_MIN_KERNEL_VERSION="2.6.32"' .config
+          grep -Fqx 'CT_GLIBC_MIN_KERNEL="2.6.32"' .config
+          grep -Fqx 'CT_LINUX_VERSION="3.10.108"' .config
+          grep -Fqx 'CT_DOWNLOAD_WGET_OPTIONS="--passive-ftp --tries=3 -nc --no-verbose"' .config
+          ! grep -Fqx 'CT_CC_GCC_USE_GRAPHITE=y' .config
+          ! grep -Fqx 'CT_CC_GCC_LIBMPX=y' .config
+          ! grep -Fqx 'CT_DEBUG_GDB=y' .config
+          ! grep -Fqx 'CT_ISL_NEEDED=y' .config
+          ! grep -Fqx 'CT_ZSTD_NEEDED=y' .config
+          grep -Fqx 'CT_LOG_INFO=y' .config
+          grep -Fqx 'CT_LOG_LEVEL_MAX="INFO"' .config
+          ! grep -Fqx 'CT_LOG_PROGRESS_BAR=y' .config
+
+      - name: Build toolchain
+        working-directory: toolchain-dir
+        run: |
+          set -euo pipefail
+          ct-ng build
+
+      - name: Verify glibc minimum kernel
+        working-directory: toolchain-dir
+        run: |
+          set -euo pipefail
+          bzgrep -F -- '--enable-kernel=2.6.32' "${TUPLE}/build.log.bz2"
+
+      - name: Verify runtime sysroot
+        run: |
+          set -euo pipefail
+          sysroot="${PWD}/toolchain-dir/${TUPLE}/${TUPLE}/sysroot"
+
+          test -x "${sysroot}/lib64/ld-linux-x86-64.so.2"
+          test -e "${sysroot}/lib64/libc.so.6"
+
+          libstdcxx="$(find "${sysroot}" \( -type f -o -type l \) -name 'libstdc++.so.6' -print -quit)"
+          libgcc="$(find "${sysroot}" \( -type f -o -type l \) -name 'libgcc_s.so.1' -print -quit)"
+
+          test -n "${libstdcxx}"
+          test -n "${libgcc}"
+
+          strings "${sysroot}/lib64/libc.so.6" | grep -Fqx 'GLIBC_2.28'
+          strings "${libstdcxx}" | grep -Fqx 'GLIBCXX_3.4.25'
+
+      - name: Create sysroot archive
+        working-directory: toolchain-dir
+        run: |
+          set -euo pipefail
+          tar -czf "${PACKAGE}.tar.gz" -C "${TUPLE}/${TUPLE}" sysroot
+
+      - name: Upload sysroot
+        uses: actions/upload-artifact@v7
+        with:
+          path: toolchain-dir/${{ env.PACKAGE }}.tar.gz
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload generated configuration
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          path: rhel7-toolchain.config
+          archive: false
+          if-no-files-found: warn
+
+      - name: Upload build log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          path: toolchain-dir/${{ env.TUPLE }}/build.log.bz2
+          archive: false
+          if-no-files-found: warn
