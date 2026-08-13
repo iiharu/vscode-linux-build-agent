@@ -66,6 +66,7 @@ jobs:
           ! grep -Fqx 'CT_GLIBC_ENABLE_DEBUG=y' .config
           ! grep -Fqx 'CT_GLIBC_ENABLE_OBSOLETE_RPC=y' .config
           ! grep -Fqx 'CT_LIBC_XLDD=y' .config
+          ! grep -Fqx 'CT_PREFIX_DIR_RO=y' .config
           grep -Fqx 'CT_GLIBC_KERNEL_VERSION_CHOSEN=y' .config
           grep -Fqx 'CT_GLIBC_MIN_KERNEL_VERSION="2.6.32"' .config
           grep -Fqx 'CT_GLIBC_MIN_KERNEL="2.6.32"' .config

@@ -1,5 +1,8 @@
 --- .config
 +++ .config
+@@ -61 +61 @@
+-CT_PREFIX_DIR_RO=y
++# CT_PREFIX_DIR_RO is not set
 @@ -71,7 +71,7 @@
  # CT_FORBID_DOWNLOAD is not set
  # CT_FORCE_DOWNLOAD is not set
